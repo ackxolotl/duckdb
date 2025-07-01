@@ -10,6 +10,7 @@
 #include "duckdb/function/cast/cast_function_set.hpp"
 #include "duckdb/main/client_data.hpp"
 #include "utf8proc_wrapper.hpp"
+#include "duckdb/main/perfetto.hpp"
 
 #include <algorithm>
 

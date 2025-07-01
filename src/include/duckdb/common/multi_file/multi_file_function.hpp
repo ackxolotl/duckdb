@@ -13,6 +13,7 @@
 #include "duckdb/function/copy_function.hpp"
 #include "duckdb/common/exception/conversion_exception.hpp"
 #include "duckdb/common/multi_file/multi_file_data.hpp"
+#include "duckdb/main/perfetto.hpp"
 #include <numeric>
 
 namespace duckdb {
@@ -252,6 +253,7 @@ public:
 	static bool TryOpenNextFile(ClientContext &context, const MultiFileBindData &bind_data,
 	                            MultiFileLocalState &scan_data, MultiFileGlobalState &global_state,
 	                            unique_lock<mutex> &parallel_lock) {
+		PerfettoTracer::Trace trace("MultiFileFunction::TryOpenNextFile()"sv);
 		if (!parallel_lock.owns_lock()) {
 			throw InternalException("parallel_lock is not held in TryOpenNextFile, this should not happen");
 		}
@@ -323,6 +325,7 @@ public:
 
 	//! Wait for a file to become available. Parallel lock should be locked when calling.
 	static void WaitForFile(idx_t file_index, MultiFileGlobalState &global_state, unique_lock<mutex> &parallel_lock) {
+		PerfettoTracer::Trace trace("MultiFileFunction::WaitForFile()"sv);
 		while (true) {
 			// Get pointer to file mutex before unlocking
 			auto &file_mutex = *global_state.readers[file_index]->file_mutex;
@@ -347,6 +350,7 @@ public:
 
 	static void InitializeFileScanState(ClientContext &context, MultiFileReaderData &reader_data,
 	                                    MultiFileLocalState &lstate, vector<idx_t> &projection_ids) {
+		PerfettoTracer::Trace trace("MultiFileFunction::InitializeFileScanState()"sv);
 		lstate.reader = reader_data.reader;
 		lstate.reader_data = reader_data;
 		auto &reader = *lstate.reader;
@@ -388,7 +392,12 @@ public:
 	// until there is a row group available for scanning or the files runs out
 	static bool TryInitializeNextBatch(ClientContext &context, const MultiFileBindData &bind_data,
 	                                   MultiFileLocalState &scan_data, MultiFileGlobalState &gstate) {
-		unique_lock<mutex> parallel_lock(gstate.lock);
+		PerfettoTracer::Trace trace("MultiFileFunction::TryInitializeNextBatch()"sv);
+		unique_lock<mutex> parallel_lock;
+		{
+			PerfettoTracer::Trace trace2("MultiFileFunction::TryInitializeNextBatch(acquiringLock)"sv);
+			parallel_lock = std::unique_lock<mutex>{gstate.lock};
+		}
 
 		while (true) {
 			if (gstate.error_opening_file) {
@@ -449,6 +458,7 @@ public:
 
 	static unique_ptr<LocalTableFunctionState>
 	MultiFileInitLocal(ExecutionContext &context, TableFunctionInitInput &input, GlobalTableFunctionState *gstate_p) {
+		PerfettoTracer::Trace trace("MultiFileFunction::MultiFileInitLocal()"sv);
 		auto &bind_data = input.bind_data->Cast<MultiFileBindData>();
 		auto &gstate = gstate_p->Cast<MultiFileGlobalState>();
 
@@ -580,6 +590,7 @@ public:
 	}
 
 	static void MultiFileScan(ClientContext &context, TableFunctionInput &data_p, DataChunk &output) {
+		PerfettoTracer::Trace trace("MultiFileScan()"sv);
 		if (!data_p.local_state) {
 			return;
 		}

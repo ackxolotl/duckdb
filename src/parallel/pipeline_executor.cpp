@@ -184,6 +184,7 @@ SinkNextBatchType PipelineExecutor::NextBatch(DataChunk &source_chunk) {
 }
 
 PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
+	PerfettoTracer::Trace trace("PipelineExecutor::Execute()"sv);
 	D_ASSERT(pipeline.sink);
 	auto &source_chunk = pipeline.operators.empty() ? final_chunk : *intermediate_chunks[0];
 	ExecutionBudget chunk_budget(max_chunks);
@@ -522,6 +523,7 @@ SinkResultType PipelineExecutor::Sink(DataChunk &chunk, OperatorSinkInput &input
 }
 
 SourceResultType PipelineExecutor::FetchFromSource(DataChunk &result) {
+	// PerfettoTracer::Trace trace("PipelineExecutor::FetchFromSource()"sv);
 	StartOperator(*pipeline.source);
 
 	OperatorSourceInput source_input = {*pipeline.source_state, *local_source_state, interrupt_state};

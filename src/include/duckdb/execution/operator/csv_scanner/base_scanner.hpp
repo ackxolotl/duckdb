@@ -13,6 +13,7 @@
 #include "duckdb/execution/operator/csv_scanner/csv_state_machine.hpp"
 #include "duckdb/execution/operator/csv_scanner/csv_error.hpp"
 #include "duckdb/common/helper.hpp"
+#include "duckdb/main/perfetto.hpp"
 
 namespace duckdb {
 

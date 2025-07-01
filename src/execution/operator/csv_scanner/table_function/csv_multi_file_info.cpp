@@ -163,6 +163,7 @@ CSVSchema CSVSchemaDiscovery::SchemaDiscovery(ClientContext &context, shared_ptr
 
 void CSVMultiFileInfo::BindReader(ClientContext &context, vector<LogicalType> &return_types, vector<string> &names,
                                   MultiFileBindData &bind_data) {
+	PerfettoTracer::Trace trace("CSVMultiFileInfo::BindReader()"sv);
 	auto &csv_data = bind_data.bind_data->Cast<ReadCSVData>();
 	auto &multi_file_list = *bind_data.file_list;
 	auto &options = csv_data.options;
@@ -348,6 +349,7 @@ void CSVFileScan::PrepareReader(ClientContext &context, GlobalTableFunctionState
 
 bool CSVFileScan::TryInitializeScan(ClientContext &context, GlobalTableFunctionState &gstate_p,
                                     LocalTableFunctionState &lstate_p) {
+	PerfettoTracer::Trace trace("CSVFileScan::TryInitializeScan()"sv);
 	auto &gstate = gstate_p.Cast<CSVGlobalState>();
 	auto &lstate = lstate_p.Cast<CSVLocalState>();
 	auto csv_reader_ptr = shared_ptr_cast<BaseFileReader, CSVFileScan>(shared_from_this());
@@ -370,12 +372,14 @@ void CSVFileScan::Scan(ClientContext &context, GlobalTableFunctionState &global_
 }
 
 void CSVFileScan::FinishFile(ClientContext &context, GlobalTableFunctionState &global_state) {
+	PerfettoTracer::Trace trace("CSVFileScan::FinishFile()"sv);
 	auto &gstate = global_state.Cast<CSVGlobalState>();
 	gstate.FinishLaunchingTasks(*this);
 }
 
 void CSVMultiFileInfo::FinishReading(ClientContext &context, GlobalTableFunctionState &global_state,
                                      LocalTableFunctionState &local_state) {
+	PerfettoTracer::Trace trace("CSVMultiFileInfo::FinishReading()"sv);
 	auto &gstate = global_state.Cast<CSVGlobalState>();
 	auto &lstate = local_state.Cast<CSVLocalState>();
 	gstate.FinishScan(std::move(lstate.csv_reader));
