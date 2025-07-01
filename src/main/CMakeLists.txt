@@ -38,6 +38,7 @@ add_library_unity(
   extension_manager.cpp
   materialized_query_result.cpp
   pending_query_result.cpp
+  perfetto.cpp
   prepared_statement.cpp
   prepared_statement_data.cpp
   profiling_info.cpp

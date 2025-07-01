@@ -10,6 +10,7 @@
 #include "concurrentqueue.h"
 #include "duckdb/common/thread.hpp"
 #include "lightweightsemaphore.h"
+#include "duckdb/main/perfetto.hpp"
 
 #include <thread>
 #else
@@ -314,6 +315,7 @@ void TaskScheduler::ExecuteTasks(idx_t max_tasks) {
 
 #ifndef DUCKDB_NO_THREADS
 static void ThreadExecuteTasks(TaskScheduler *scheduler, atomic<bool> *marker) {
+	PerfettoTracer::registerThread("worker");
 	scheduler->ExecuteForever(marker);
 }
 #endif

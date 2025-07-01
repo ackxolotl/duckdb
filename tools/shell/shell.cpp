@@ -145,6 +145,7 @@ typedef unsigned char u8;
 #include "shell_renderer.hpp"
 #include "shell_highlight.hpp"
 #include "shell_state.hpp"
+#include "duckdb/main/perfetto.hpp"
 
 using namespace duckdb_shell;
 
@@ -4778,6 +4779,7 @@ int SQLITE_CDECL main(int argc, char **argv) {
 int SQLITE_CDECL wmain(int argc, wchar_t **wargv) {
 	char **argv;
 #endif
+	duckdb::PerfettoTracer::registerThread("main");
 	char *zErrMsg = nullptr;
 	ShellState data;
 	const char *zInitFile = nullptr;
