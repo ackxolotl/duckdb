@@ -76,6 +76,7 @@ bool CSVFileHandle::FinishedReading() const {
 }
 
 idx_t CSVFileHandle::Read(void *buffer, idx_t nr_bytes) {
+	PerfettoTracer::Trace trace("CSVFileHandle::Read()"sv);
 	requested_bytes += nr_bytes;
 	// if this is a plain file source OR we can seek we are not caching anything
 	idx_t bytes_read = 0;

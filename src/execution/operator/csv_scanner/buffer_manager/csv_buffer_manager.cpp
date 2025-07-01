@@ -1,6 +1,7 @@
 #include "duckdb/execution/operator/csv_scanner/csv_buffer_manager.hpp"
 #include "duckdb/execution/operator/csv_scanner/csv_buffer.hpp"
 #include "duckdb/function/table/read_csv.hpp"
+#include "duckdb/main/perfetto.hpp"
 namespace duckdb {
 
 CSVBufferManager::CSVBufferManager(ClientContext &context_p, const CSVReaderOptions &options,
@@ -26,6 +27,7 @@ void CSVBufferManager::UnpinBuffer(const idx_t cache_idx) {
 }
 
 void CSVBufferManager::Initialize() {
+	PerfettoTracer::Trace trace("CSVBufferManager::Initialize()"sv);
 	if (cached_buffers.empty()) {
 		cached_buffers.emplace_back(make_shared_ptr<CSVBuffer>(context, buffer_size, *file_handle, global_csv_pos));
 		last_buffer = cached_buffers.front();

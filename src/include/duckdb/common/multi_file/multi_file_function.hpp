@@ -590,7 +590,7 @@ public:
 	}
 
 	static void MultiFileScan(ClientContext &context, TableFunctionInput &data_p, DataChunk &output) {
-		PerfettoTracer::Trace trace("MultiFileScan()"sv);
+		// PerfettoTracer::Trace trace("MultiFileScan()"sv);
 		if (!data_p.local_state) {
 			return;
 		}
